@@ -1,152 +1,234 @@
 import { test, expect } from "@playwright/test";
-import { HomePage } from "../pages/Home";
-import { RegistrationModal } from "../components/registrationModal";
-import { GaragePage } from "../pages/Garage";
-
+import type { Page } from "@playwright/test";
 test.describe("Registration", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-  });
   test("Check required fields", async ({ page }) => {
-    const homePage = new HomePage(page);
-    const registrationModal = new RegistrationModal(page);
-    await homePage.openRegistrationModal();
-    await registrationModal.clickOnNameInput();
-    await registrationModal.clickOnSignupLastNameInput();
-    await registrationModal.clickOnEmailInput();
-    await registrationModal.clickOnPasswordInput();
-    await registrationModal.clickOnReEnterPasswordInput();
-    await registrationModal.clickOnNameInput();
-    await expect(registrationModal.nameError).toHaveText("Name required");
-    await expect(registrationModal.signupLastNameError).toHaveText(
-      "Last name required"
+    const {
+      nameInput,
+      signupLastNameInput,
+      emailInput,
+      passwordInput,
+      reEnterPasswordInput,
+      registerBtn,
+    } = locators(page);
+
+    await page.goto("/");
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.locator("app-signin-modal").waitFor();
+    await page.getByRole("button", { name: "Registration" }).click();
+    await page.locator(".modal-title", { hasText: "Registration" }).waitFor();
+    await expect(registerBtn).toHaveAttribute("disabled");
+
+    await nameInput.click();
+    await signupLastNameInput.click();
+    await emailInput.click();
+    await passwordInput.click();
+    await reEnterPasswordInput.click();
+    await nameInput.click();
+
+    await expect(page.locator(`${nameXPath}//${siblingXPath}`)).toHaveText(
+      "Name required"
     );
-    await expect(registrationModal.emailError).toHaveText("Email required");
-    await expect(registrationModal.passwordError).toHaveText(
+    await expect(
+      page.locator(`${signupLastNameXPath}//${siblingXPath}`)
+    ).toHaveText("Last name required");
+
+    await expect(page.locator(`${emailXPath}//${siblingXPath}`)).toHaveText(
+      "Email required"
+    );
+    await expect(page.locator(`${passwordXPath}//${siblingXPath}`)).toHaveText(
       "Password required"
     );
-    await expect(registrationModal.reEnterPasswordError).toHaveText(
-      "Re-enter password required"
-    );
-    await expect(homePage.registerBtn).toHaveAttribute("disabled");
+    await expect(
+      page.locator(`${reEnterPasswordXPath}//${siblingXPath}`)
+    ).toHaveText("Re-enter password required");
+
+    await expect(registerBtn).toHaveAttribute("disabled");
   });
 
   test("Chech length of entered data", async ({ page }) => {
-    const homePage = new HomePage(page);
-    const registrationModal = new RegistrationModal(page);
-    await homePage.openRegistrationModal();
-    await registrationModal.clickOnNameInput();
-    await registrationModal.clickOnSignupLastNameInput();
-    await registrationModal.clickOnNameInput();
+    const { nameInput, signupLastNameInput, registerBtn } = locators(page);
+    await page.goto("/");
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.locator("app-signin-modal").waitFor();
+    await page.getByRole("button", { name: "Registration" }).click();
+    await page.locator(".modal-title", { hasText: "Registration" }).waitFor();
+    await nameInput.click();
+    await signupLastNameInput.click();
+    await nameInput.click();
+
     const twentyCharsTxt = "abcdefghijklmnopqrst";
-    await registrationModal.fillNameInput("a");
-    await expect(registrationModal.nameError).toHaveText(
+
+    await nameInput.fill("a");
+    await expect(page.locator(`${nameXPath}//${siblingXPath}`)).toHaveText(
       "Name has to be from 2 to 20 characters long"
     );
-    await registrationModal.fillNameInput("ab");
-    await expect(registrationModal.nameError).not.toBeVisible();
-    await registrationModal.fillNameInput(twentyCharsTxt);
-    await expect(registrationModal.nameError).not.toBeVisible();
-    await registrationModal.fillNameInput(twentyCharsTxt + "a");
-    await expect(registrationModal.nameError).toHaveText(
+    await nameInput.fill("ab");
+    await expect(
+      page.locator(`${nameXPath}//${siblingXPath}`)
+    ).not.toBeVisible();
+    await nameInput.fill(twentyCharsTxt);
+    await expect(
+      page.locator(`${nameXPath}//${siblingXPath}`)
+    ).not.toBeVisible();
+    await nameInput.fill(twentyCharsTxt + "a");
+    await expect(page.locator(`${nameXPath}//${siblingXPath}`)).toHaveText(
       "Name has to be from 2 to 20 characters long"
     );
-    await registrationModal.fillSignupLastNameInput("a");
-    await expect(registrationModal.signupLastNameError).toHaveText(
-      "Last name has to be from 2 to 20 characters long"
-    );
-    await registrationModal.fillSignupLastNameInput("ab");
-    await expect(registrationModal.signupLastNameError).not.toBeVisible();
-    await registrationModal.fillSignupLastNameInput(twentyCharsTxt);
-    await expect(registrationModal.signupLastNameError).not.toBeVisible();
-    await registrationModal.fillSignupLastNameInput(twentyCharsTxt + "a");
-    await expect(registrationModal.signupLastNameError).toHaveText(
-      "Last name has to be from 2 to 20 characters long"
-    );
-    await expect(homePage.registerBtn).toHaveAttribute("disabled");
+    await signupLastNameInput.fill("a");
+    await expect(
+      page.locator(`${signupLastNameXPath}//${siblingXPath}`)
+    ).toHaveText("Last name has to be from 2 to 20 characters long");
+    await signupLastNameInput.fill("ab");
+    await expect(
+      page.locator(`${signupLastNameXPath}//${siblingXPath}`)
+    ).not.toBeVisible();
+    await signupLastNameInput.fill(twentyCharsTxt);
+    await expect(
+      page.locator(`${signupLastNameXPath}//${siblingXPath}`)
+    ).not.toBeVisible();
+    await signupLastNameInput.fill(twentyCharsTxt + "a");
+    await expect(
+      page.locator(`${signupLastNameXPath}//${siblingXPath}`)
+    ).toHaveText("Last name has to be from 2 to 20 characters long");
+    await expect(registerBtn).toHaveAttribute("disabled");
   });
 
   test("Check Email field", async ({ page }) => {
-    const homePage = new HomePage(page);
-    const registrationModal = new RegistrationModal(page);
-    await homePage.openRegistrationModal();
-    await registrationModal.clickOnEmailInput();
-    await registrationModal.clickOnPasswordInput();
-    await registrationModal.fillEmailInput("a");
-    await expect(registrationModal.emailError).toHaveText("Email is incorrect");
-    await registrationModal.fillEmailInput("a@");
-    await expect(registrationModal.emailError).toHaveText("Email is incorrect");
-    await registrationModal.fillEmailInput("a@a");
-    await expect(registrationModal.emailError).toHaveText("Email is incorrect");
-    await registrationModal.fillEmailInput("a@a.io");
-    await expect(registrationModal.emailError).not.toBeVisible();
-    await expect(homePage.registerBtn).toHaveAttribute("disabled");
+    const { emailInput, passwordInput, registerBtn } = locators(page);
+    await page.goto("/");
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.locator("app-signin-modal").waitFor();
+    await page.getByRole("button", { name: "Registration" }).click();
+    await page.locator(".modal-title", { hasText: "Registration" }).waitFor();
+    await emailInput.click();
+    await passwordInput.click();
+    await emailInput.fill("a");
+    await expect(page.locator(`${emailXPath}//${siblingXPath}`)).toHaveText(
+      "Email is incorrect"
+    );
+    await emailInput.fill("a@");
+    await expect(page.locator(`${emailXPath}//${siblingXPath}`)).toHaveText(
+      "Email is incorrect"
+    );
+    await emailInput.fill("a@a");
+    await expect(page.locator(`${emailXPath}//${siblingXPath}`)).toHaveText(
+      "Email is incorrect"
+    );
+    await emailInput.fill("a@a.io");
+    await expect(
+      page.locator(`${emailXPath}//${siblingXPath}`)
+    ).not.toBeVisible();
+    await expect(registerBtn).toHaveAttribute("disabled");
   });
 
   test("Check Password fields", async ({ page }) => {
-    const homePage = new HomePage(page);
-    const registrationModal = new RegistrationModal(page);
-    await homePage.openRegistrationModal();
-    await registrationModal.clickOnPasswordInput();
-    await registrationModal.clickOnReEnterPasswordInput();
-    await registrationModal.fillPasswordInput("a");
-    await expect(registrationModal.passwordError).toHaveText(
-      "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
-    );
-    await registrationModal.fillPasswordInput("abcdefgh!jklmn1o");
-    const correctPassword = "Abcdefgh!jklmn1";
-    await expect(registrationModal.passwordError).toHaveText(
-      "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
-    );
-    await registrationModal.fillPasswordInput(correctPassword + "a");
-    await expect(registrationModal.passwordError).toHaveText(
-      "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
-    );
-    await registrationModal.fillPasswordInput(correctPassword.toUpperCase());
-    await expect(registrationModal.passwordError).toHaveText(
-      "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
-    );
-    await registrationModal.fillPasswordInput(correctPassword);
-    await expect(registrationModal.passwordError).not.toBeVisible();
-    await expect(homePage.registerBtn).toHaveAttribute("disabled");
+    const { nameInput, passwordInput, reEnterPasswordInput, registerBtn } =
+      locators(page);
+    await page.goto("/");
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.locator("app-signin-modal").waitFor();
+    await page.getByRole("button", { name: "Registration" }).click();
+    await page.locator(".modal-title", { hasText: "Registration" }).waitFor();
+    await passwordInput.click();
+    await reEnterPasswordInput.click();
+    await nameInput.click();
 
-    await registrationModal.fillReEnterPasswordInput("a");
-    await expect(registrationModal.reEnterPasswordError).toHaveText(
+    await passwordInput.fill("a");
+    await expect(page.locator(`${passwordXPath}//${siblingXPath}`)).toHaveText(
       "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
     );
-    await registrationModal.fillReEnterPasswordInput("abcdefgh!jklmn1o");
-    await expect(registrationModal.reEnterPasswordError).toHaveText(
+    await passwordInput.fill("abcdefgh!jklmn1o");
+    const correctPassword = "Abcdefgh!jklmn1";
+    await expect(page.locator(`${passwordXPath}//${siblingXPath}`)).toHaveText(
       "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
     );
-    await registrationModal.fillReEnterPasswordInput(correctPassword + "a");
-    await expect(registrationModal.reEnterPasswordError).toHaveText(
+    await passwordInput.fill(correctPassword + "a");
+    await expect(page.locator(`${passwordXPath}//${siblingXPath}`)).toHaveText(
       "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
     );
-    await registrationModal.fillReEnterPasswordInput(
-      correctPassword.toUpperCase()
-    );
-    await expect(registrationModal.reEnterPasswordError).toHaveText(
+    await passwordInput.fill(correctPassword.toUpperCase());
+    await expect(page.locator(`${passwordXPath}//${siblingXPath}`)).toHaveText(
       "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
     );
-    await registrationModal.fillReEnterPasswordInput(correctPassword);
-    await expect(registrationModal.reEnterPasswordError).not.toBeVisible();
-    await expect(homePage.registerBtn).toHaveAttribute("disabled");
+    await passwordInput.fill(correctPassword);
+    await expect(
+      page.locator(`${passwordXPath}//${siblingXPath}`)
+    ).not.toBeVisible();
+    await expect(registerBtn).toHaveAttribute("disabled");
+
+    await reEnterPasswordInput.fill("a");
+    await expect(
+      page.locator(`${reEnterPasswordXPath}//${siblingXPath}`)
+    ).toHaveText(
+      "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
+    );
+    await reEnterPasswordInput.fill("abcdefgh!jklmn1o");
+    await expect(
+      page.locator(`${reEnterPasswordXPath}//${siblingXPath}`)
+    ).toHaveText(
+      "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
+    );
+    await reEnterPasswordInput.fill(correctPassword + "a");
+    await expect(
+      page.locator(`${reEnterPasswordXPath}//${siblingXPath}`)
+    ).toHaveText(
+      "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
+    );
+    await reEnterPasswordInput.fill(correctPassword.toUpperCase());
+    await expect(
+      page.locator(`${reEnterPasswordXPath}//${siblingXPath}`)
+    ).toHaveText(
+      "Password has to be from 8 to 15 characters long and contain at least one integer, one capital, and one small letter"
+    );
+    await reEnterPasswordInput.fill(correctPassword);
+    await expect(
+      page.locator(`${reEnterPasswordXPath}//${siblingXPath}`)
+    ).not.toBeVisible();
+    await expect(registerBtn).toHaveAttribute("disabled");
   });
 
   test("Registration. Positive case", async ({ page }) => {
-    const homePage = new HomePage(page);
-    const registrationModal = new RegistrationModal(page);
-    const garagePage = new GaragePage(page);
-    await homePage.openRegistrationModal();
+    const {
+      nameInput,
+      signupLastNameInput,
+      emailInput,
+      passwordInput,
+      reEnterPasswordInput,
+      registerBtn,
+    } = locators(page);
+
+    await page.goto("/");
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.locator("app-signin-modal").waitFor();
+    await page.getByRole("button", { name: "Registration" }).click();
+    await page.locator(".modal-title", { hasText: "Registration" }).waitFor();
+
     const correctPassword = "Abcdefgh!jklmn1";
-    await registrationModal.fillNameInput("Svitlana");
-    await registrationModal.fillSignupLastNameInput("Automation");
-    await registrationModal.fillEmailInput("aqa_s-vihovska@aqa.io");
-    await registrationModal.fillPasswordInput(correctPassword);
-    await registrationModal.fillReEnterPasswordInput(correctPassword);
-    await expect(homePage.registerBtn).not.toHaveAttribute("disabled");
-    await homePage.registerBtn.click();
-    await registrationModal.registrationModal.waitFor({ state: "hidden" });
-    await expect(garagePage.garageTable).toBeVisible();
+    await nameInput.fill("Svitlana");
+    await signupLastNameInput.fill("Automation");
+    await emailInput.fill("aqa_svihovska@aqa.io");
+    await passwordInput.fill(correctPassword);
+    await reEnterPasswordInput.fill(correctPassword);
+    await expect(registerBtn).not.toHaveAttribute("disabled");
+    await registerBtn.click();
+    await page.locator("app-signup-modal").waitFor({ state: "hidden" });
+    await expect(page.locator("#userNavDropdown")).toBeVisible();
   });
 });
+const nameXPath = '//input[@id="signupName"]';
+const signupLastNameXPath = '//input[@id="signupLastName"]';
+const emailXPath = '//input[@id="signupEmail"]';
+const passwordXPath = '//input[@id="signupPassword"]';
+const reEnterPasswordXPath = '//input[@id="signupRepeatPassword"]';
+const siblingXPath = "following-sibling::div/p";
+
+function locators(page: Page) {
+  return {
+    nameInput: page.locator(nameXPath),
+    signupLastNameInput: page.locator(signupLastNameXPath),
+    emailInput: page.locator(emailXPath),
+    passwordInput: page.locator(passwordXPath),
+    reEnterPasswordInput: page.locator(reEnterPasswordXPath),
+    registerBtn: page.getByRole("button", { name: "Register" }),
+  };
+}
