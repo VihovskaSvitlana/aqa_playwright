@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { HomePage } from "../../pages/Home";
 import { RegistrationModal } from "../../components/registrationModal";
-import { GaragePage } from "../../pages/Garage";
+import { GaragePage } from "../../pages/GaragePage";
 
 test.describe("Registration", () => {
   test.beforeEach(async ({ page }) => {
