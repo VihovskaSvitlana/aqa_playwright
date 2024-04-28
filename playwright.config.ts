@@ -12,6 +12,7 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   timeout: 1000 * 60,
   testDir: "./tests",
+  reporter: "./reporter.ts",
   expect: {
     timeout: 5000,
   },
@@ -25,20 +26,22 @@ export default defineConfig({
   workers: process.env.CI ? "100%" : 7,
   maxFailures: process.env.CI ? 100 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: "html",
+  // reporter: [["html", { open: "on-failure" }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'https://qauto.forstudy.space/',
-    httpCredentials:{
-      username: 'guest',
-      password: 'welcome2qauto'
+    baseURL: "https://qauto.forstudy.space/",
+    httpCredentials: {
+      username: "guest",
+      password: "welcome2qauto",
     },
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
+    screenshot: "only-on-failure",
     actionTimeout: 30_000,
     navigationTimeout: 30_000,
+    video: "retain-on-failure",
   },
 
   /* Configure projects for major browsers */
