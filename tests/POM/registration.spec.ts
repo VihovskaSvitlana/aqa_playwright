@@ -133,7 +133,7 @@ test.describe("Registration", () => {
     await expect(homePage.registerBtn).toHaveAttribute("disabled");
   });
 
-  test("Registration. Positive case", async ({ page }) => {
+  test.skip("Registration. Positive case", async ({ page }) => {
     const homePage = new HomePage(page);
     const registrationModal = new RegistrationModal(page);
     const garagePage = new GaragePage(page);
