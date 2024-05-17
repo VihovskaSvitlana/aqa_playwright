@@ -4,7 +4,8 @@ on:
     branches: 
       - workflows
   pull_request:
-    - workflows
+    branches: 
+      - workflows
 jobs:
   test:
     runs-on: ubuntu-latest
