@@ -2,9 +2,9 @@ name : Api Test Using Workflow
 on: 
   push: 
     branches: 
-      - workflow
+      - workflows
   pull_requests:
-    - workflow
+    - workflows
 jobs:
   test:
     runs-on: ubuntu-latest
